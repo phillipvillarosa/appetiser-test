@@ -9,6 +9,7 @@ require('./bootstrap');
 window.Vue = require('vue');
 
 window._ = require('lodash');
+window.moment = require('moment');
 
 /**
  * The following block of code may be used to automatically register your

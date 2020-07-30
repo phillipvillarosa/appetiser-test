@@ -10,20 +10,20 @@
                     </div>
                     <div class="row">
                         <div class="col-4">
-                            <form>
+                            <form @submit.prevent="saveEvent()">
                                 <div class="form-group">
                                     <label for="event">Event</label>
-                                    <input type="text" class="form-control" id="event" v-model="event_data.name">
+                                    <input type="text" class="form-control" id="event" required v-model="event_data.name">
                                 </div>
                                 <div class="form-group">
                                     <div class="row">
                                         <div class="col-6">
                                             <label for="dateFrom">From</label>
-                                            <input type="date" class="form-control" id="dateFrom" v-model="event_data.from">
+                                            <input type="date" class="form-control" id="dateFrom" required v-model="event_data.from" @change="preloadDate('from')">
                                         </div>
                                         <div class="col-6">
                                             <label for="dateTo">To</label>
-                                            <input type="date" class="form-control" id="dateTo" v-model="event_data.to">
+                                            <input type="date" class="form-control" id="dateTo" required v-model="event_data.to" @change="preloadDate('to')">
                                         </div>
                                     </div>
                                 </div>
@@ -34,13 +34,31 @@
                                     </div>
                                 </div>
                                 <div class="form-group">
-                                    <button type="submit" class="btn btn-primary" @submit="saveEvent">Save</button>
+                                    <button type="submit" class="btn btn-primary">Save</button>
                                 </div>
                             </form>
                         </div>
 
                         <div class="col-8">
-                            Calendar
+                            <div class="row">
+                                <div class="col-12">
+                                    <h2>{{data.month}} {{data.year}}</h2>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-12">
+                                    <div v-for="data, date in data.events">
+                                        <div class="row">
+                                            <div class="col-3 mt-3 mb-3">{{date | monthYear}}</div>
+                                            <div class="col-9 mt-3 mb-3">
+                                                <div v-if="data">
+                                                    {{data.event.name}}        
+                                                </div>
+                                            </div>   
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -59,24 +77,42 @@
                     to: "",
                     days: {
                         mon: false,
-                        tues: false,
+                        tue: false,
                         wed: false,
-                        thurs: false,
+                        thu: false,
                         fri: false,
                         sat: false,
                         sun: false,
                     },
                 },
 
+                data: []
             }
         },
 
         mounted() {
+            this.getEvents();
         },
 
         methods: {
+            getEvents(filter_date = false) {
+                var date_params = {};
+                if (filter_date) {
+                    date_params['from'] = this.event_data.from;
+                    date_params['to'] = this.event_data.to;
+                }
+
+                axios.get('/api/get-events', {params: date_params}).then(({data}) => {
+                    this.data = data;
+                });
+            },
             saveEvent() {
-                
+                axios.post('/api/save-event', this.event_data).then(({data}) => {
+                    this.getEvents(true);
+                });
+            },
+            preloadDate(type) {
+                console.log(type, this.event_data.from);
             }
         },
 
@@ -85,6 +121,10 @@
                 if (!val) return "";
 
                 return _.startCase(val);
+            },
+            monthYear: (val) => {
+                if (!val) return "";
+                return moment(val).format('D ddd');
             }
         }
     }

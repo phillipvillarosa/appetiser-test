@@ -14,7 +14,7 @@ class AddEventDateForeignKey extends Migration
     public function up()
     {
         Schema::table('event_dates', function (Blueprint $table) {
-            $table->foreignId('event_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('event_id')->default('null')->constrained()->cascadeOnDelete();
         });
     }
 
