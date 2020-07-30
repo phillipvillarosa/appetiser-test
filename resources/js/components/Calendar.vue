@@ -19,11 +19,11 @@
                                     <div class="row">
                                         <div class="col-6">
                                             <label for="dateFrom">From</label>
-                                            <input type="date" class="form-control" id="dateFrom" required v-model="event_data.from" @change="preloadDate('from')">
+                                            <input type="date" class="form-control" id="dateFrom" required v-model="event_data.from">
                                         </div>
                                         <div class="col-6">
                                             <label for="dateTo">To</label>
-                                            <input type="date" class="form-control" id="dateTo" required v-model="event_data.to" @change="preloadDate('to')">
+                                            <input type="date" class="form-control" id="dateTo" required v-model="event_data.to">
                                         </div>
                                     </div>
                                 </div>
@@ -34,12 +34,15 @@
                                     </div>
                                 </div>
                                 <div class="form-group">
-                                    <button type="submit" class="btn btn-primary">Save</button>
+                                    <button type="submit" class="btn btn-primary" :disabled="saving">
+                                        <span v-if="!saving">Save</span>
+                                        <span v-else>Saving...</span>
+                                    </button>
                                 </div>
                             </form>
                         </div>
 
-                        <div class="col-8">
+                        <div class="col-8" v-if="!loading">
                             <div class="row">
                                 <div class="col-12">
                                     <h2>{{data.month}} {{data.year}}</h2>
@@ -60,6 +63,9 @@
                                 </div>
                             </div>
                         </div>
+                        <div v-else class="col-8">
+                            <div class="alert alert-info">Loading...</div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -68,6 +74,8 @@
 </template>
 
 <script>
+    import 'vuejs-noty/dist/vuejs-noty.css';
+
     export default {
         data() {
             return {
@@ -86,7 +94,10 @@
                     },
                 },
 
-                data: []
+                data: [],
+
+                saving: false,
+                loading: true,
             }
         },
 
@@ -96,6 +107,7 @@
 
         methods: {
             getEvents(filter_date = false) {
+                this.loading = true;
                 var date_params = {};
                 if (filter_date) {
                     date_params['from'] = this.event_data.from;
@@ -104,16 +116,17 @@
 
                 axios.get('/api/get-events', {params: date_params}).then(({data}) => {
                     this.data = data;
+                    this.loading = false;
                 });
             },
             saveEvent() {
+                this.saving = true;
                 axios.post('/api/save-event', this.event_data).then(({data}) => {
                     this.getEvents(true);
+                    this.saving = false;
+                    this.$noty.success("Event successfully saved!");
                 });
             },
-            preloadDate(type) {
-                console.log(type, this.event_data.from);
-            }
         },
 
         filters: {

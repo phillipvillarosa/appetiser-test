@@ -11,6 +11,15 @@ window.Vue = require('vue');
 window._ = require('lodash');
 window.moment = require('moment');
 
+import { library } from '@fortawesome/fontawesome-svg-core'
+import { faUserSecret } from '@fortawesome/free-solid-svg-icons'
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+library.add(faUserSecret);
+
+Vue.component('font-awesome-icon', FontAwesomeIcon);
+
+import VueNoty from 'vuejs-noty';
+Vue.use(VueNoty);
 /**
  * The following block of code may be used to automatically register your
  * Vue components. It will recursively scan this directory for the Vue
